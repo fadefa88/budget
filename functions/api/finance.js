@@ -27,10 +27,11 @@ export async function onRequestGet(context) {
 
     const expenses = parseExpenses(conto);
     const incomes = parseIncomes(entrate);
-    const response = json({ generatedAt: new Date().toISOString(), expenses, incomes });
+    const generatedAt = new Date().toISOString();
+    const response = json({ generatedAt, expenses, incomes });
     response.headers.set('Cache-Control', forceRefresh ? 'no-store' : 'public, max-age=300');
 
-    const cachedResponse = json({ generatedAt: new Date().toISOString(), expenses, incomes });
+    const cachedResponse = json({ generatedAt, expenses, incomes });
     cachedResponse.headers.set('Cache-Control', 'public, max-age=300');
     context.waitUntil(cache.put(cacheKey, cachedResponse));
 
@@ -92,7 +93,7 @@ async function getAccessToken(email, privateKey) {
   const key = await importPrivateKey(privateKey);
   const signature = await crypto.subtle.sign({ name: 'RSASSA-PKCS1-v1_5' }, key, new TextEncoder().encode(unsigned));
   const assertion = `${unsigned}.${base64UrlBytes(new Uint8Array(signature))}`;
-  const body = new URLSearchParams({ grant_type: 'urn:ietf:params:oauth2:grant-type:jwt-bearer', assertion });
+  const body = new URLSearchParams({ grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion });
   const res = await fetch(TOKEN_URL, { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body });
   if (!res.ok) throw new Error(`Google OAuth ${res.status}: ${await res.text()}`);
   const payload = await res.json();
