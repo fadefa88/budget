@@ -37,7 +37,12 @@ function render() {
         <div class="topbar-main">
           <div class="brand"><div class="brand-mark"></div><div><div class="brand-title">Budget</div><div class="brand-sub">Dashboard finanziaria</div></div></div>
           <nav class="tabs">${pages.map(([id, label]) => `<button class="tab ${page === id ? 'active' : ''}" data-page="${id}">${label}</button>`).join('')}</nav>
-          <label class="year-control">Anno <select id="yearSelect">${availableYears(data).map((y) => `<option value="${y}" ${y === year ? 'selected' : ''}>${y}</option>`).join('')}</select></label>
+          <div class="header-actions">
+            <button id="refreshData" class="refresh-button" type="button" aria-label="Aggiorna dati da Google Sheets" title="Aggiorna dati">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0-15.5-3M4 4v4h4M4 13a8.1 8.1 0 0 0 15.5 3M20 20v-4h-4"/></svg>
+            </button>
+            <label class="year-control">Anno <select id="yearSelect">${availableYears(data).map((y) => `<option value="${y}" ${y === year ? 'selected' : ''}>${y}</option>`).join('')}</select></label>
+          </div>
         </div>
         <div class="status-bar"><span><span class="status-dot"></span>Dati Google Sheets</span><span>${data.generatedAt ? `aggiornati ${new Date(data.generatedAt).toLocaleString('it-IT')}` : ''}</span></div>
       </header>
@@ -46,7 +51,28 @@ function render() {
 
   document.querySelectorAll('[data-page]').forEach((b) => b.addEventListener('click', () => { page = b.dataset.page; render(); }));
   document.querySelector('#yearSelect').addEventListener('change', (e) => { year = Number(e.target.value); selectedMonths.clear(); render(); });
+  document.querySelector('#refreshData')?.addEventListener('click', refreshDataNow);
   renderCharts();
+}
+
+async function refreshDataNow() {
+  const button = document.querySelector('#refreshData');
+  if (!button || button.disabled) return;
+  button.disabled = true;
+  button.classList.add('refreshing');
+
+  try {
+    const currentYear = year;
+    data = await loadFinanceData(true);
+    const years = availableYears(data);
+    year = years.includes(currentYear) ? currentYear : years[0];
+    selectedMonths.clear();
+    render();
+  } catch (err) {
+    button.disabled = false;
+    button.classList.remove('refreshing');
+    alert(`Impossibile aggiornare i dati: ${err.message}`);
+  }
 }
 
 function renderPage() {
