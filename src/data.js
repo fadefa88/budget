@@ -6,8 +6,12 @@ const percent = new Intl.NumberFormat('it-IT', { style: 'percent', maximumFracti
 
 export const fmt = { euro, euro2, percent };
 
-export async function loadFinanceData() {
-  const response = await fetch('/api/finance', { headers: { accept: 'application/json' } });
+export async function loadFinanceData(forceRefresh = false) {
+  const url = forceRefresh ? `/api/finance?refresh=1&t=${Date.now()}` : '/api/finance';
+  const response = await fetch(url, {
+    headers: { accept: 'application/json' },
+    cache: forceRefresh ? 'no-store' : 'default',
+  });
   if (!response.ok) {
     const body = await response.text().catch(() => '');
     throw new Error(body || `API non disponibile (${response.status})`);
