@@ -10,9 +10,9 @@
     <meta name="format-detection" content="telephone=no" />
     <meta name="robots" content="noindex,nofollow" />
     <title>Budget Dashboard</title>
-    <link rel="stylesheet" href="/assets/styles.css?v=20260821-0012" />
+    <link rel="stylesheet" href="/assets/styles.css?v=20260821-0016" />
     <style>
-      /* Header essenziale: solo tab + selettore anno. */
+      /* Header essenziale: solo tab + controlli. */
       .brand,
       .status-bar {
         display: none !important;
@@ -52,6 +52,56 @@
         white-space: normal !important;
         text-align: center;
         line-height: 1.15;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .refresh-button {
+        width: 38px;
+        height: 38px;
+        flex: 0 0 38px;
+        display: grid;
+        place-items: center;
+        padding: 0;
+        border: 1px solid #c7c7cc;
+        border-radius: 10px;
+        background: #fff;
+        color: #007aff;
+        cursor: pointer;
+        touch-action: manipulation;
+      }
+
+      .refresh-button svg {
+        width: 20px;
+        height: 20px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .refresh-button:active {
+        background: #f2f2f7;
+        transform: scale(.96);
+      }
+
+      .refresh-button:disabled {
+        opacity: .6;
+        cursor: default;
+      }
+
+      .refresh-button.refreshing svg {
+        animation: refresh-spin .7s linear infinite;
+      }
+
+      @keyframes refresh-spin {
+        to { transform: rotate(360deg); }
       }
 
       .year-control {
@@ -94,7 +144,7 @@
           grid-template-columns: 1fr !important;
           grid-template-areas:
             "tabs"
-            "year";
+            "actions";
           gap: 3px !important;
           padding: 6px 10px 8px !important;
         }
@@ -111,9 +161,20 @@
           line-height: 1.12;
         }
 
+        .header-actions {
+          grid-area: actions;
+          width: 100%;
+          justify-content: space-between;
+          padding-top: 1px;
+        }
+
+        .refresh-button {
+          width: 36px;
+          height: 36px;
+          flex-basis: 36px;
+        }
+
         .year-control {
-          grid-area: year;
-          justify-self: end;
           font-size: 0 !important;
           margin: 0;
         }
@@ -136,6 +197,6 @@
   </head>
   <body>
     <div id="app"></div>
-    <script type="module" src="/assets/main.js?v=20260821-0012"></script>
+    <script type="module" src="/assets/main.js?v=20260821-0016"></script>
   </body>
 </html>
