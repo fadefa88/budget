@@ -87,7 +87,7 @@ function pageCashflow() {
       ${kpi('Cash Flow Netto', fmt.euro.format(annual.cashFlowNetto), annual.cashFlowNetto >= 0 ? 'Saldo positivo' : 'Saldo negativo', annual.cashFlowNetto >= 0 ? 'good' : 'bad')}
     </div>
     <div class="gauge-grid section-gap">${gaugeRows.map((r) => `<div class="card gauge-card"><div id="gauge-${r.month}" class="gauge"></div></div>`).join('')}</div>
-    <div class="card table-card section-gap"><div class="table-wrap"><table><thead><tr><th>Mese</th><th>Entrate</th><th>Uscite</th><th>Investimenti</th><th>Risparmio</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${r.label}</td><td>${fmt.euro2.format(r.entrate)}</td><td>${fmt.euro2.format(r.uscite)}</td><td>${fmt.euro2.format(r.investimenti)}</td><td class="${r.cashFlowNetto >= 0 ? 'good' : 'bad'}"><strong>${fmt.euro2.format(r.cashFlowNetto)}</strong></td></tr>`).join('')}</tbody></table></div></div>`;
+    <div class="card table-card section-gap"><div class="table-wrap"><table><thead><tr><th>Mese</th><th>Entrate</th><th>Uscite</th><th>Investimenti</th><th>Risparmio</th></tr></thead><tbody>${gaugeRows.map((r) => `<tr><td>${r.label}</td><td>${fmt.euro2.format(r.entrate)}</td><td>${fmt.euro2.format(r.uscite)}</td><td>${fmt.euro2.format(r.investimenti)}</td><td class="${r.cashFlowNetto >= 0 ? 'good' : 'bad'}"><strong>${fmt.euro2.format(r.cashFlowNetto)}</strong></td></tr>`).join('')}</tbody></table></div></div>`;
 }
 
 function pageAverage() {
