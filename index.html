@@ -10,33 +10,125 @@
     <meta name="format-detection" content="telephone=no" />
     <meta name="robots" content="noindex,nofollow" />
     <title>Budget Dashboard</title>
-    <link rel="stylesheet" href="/assets/styles.css" />
+    <link rel="stylesheet" href="/assets/styles.css?v=20260820-2338" />
     <style>
+      /* Header essenziale: solo tab + selettore anno. */
+      .brand,
+      .status-bar {
+        display: none !important;
+      }
+
+      .topbar-main {
+        min-height: 58px !important;
+        padding: 8px 22px !important;
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: nowrap !important;
+      }
+
+      .tabs {
+        position: static !important;
+        inset: auto !important;
+        order: initial !important;
+        flex-basis: auto !important;
+        width: 100%;
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 4px;
+        overflow: visible !important;
+        padding: 0 !important;
+        background: transparent !important;
+        border: 0 !important;
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+      }
+
+      .tab {
+        min-width: 0;
+        min-height: 42px;
+        padding: 7px 6px;
+        white-space: normal !important;
+        text-align: center;
+        line-height: 1.15;
+      }
+
+      .year-control {
+        position: static !important;
+        display: flex !important;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 6px;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        white-space: nowrap;
+      }
+
+      .year-control select {
+        display: block !important;
+        min-width: 78px;
+        min-height: 38px;
+        font-size: 16px !important;
+        line-height: 1.2;
+        color: #1c1c1e !important;
+        background: #fff !important;
+        padding: 7px 26px 7px 10px !important;
+        border-radius: 10px !important;
+      }
+
+      /* Solo la tabella dell'Andamento Mensile non ha limite verticale. */
+      .grid-3 + .chart-card + .table-card .table-wrap {
+        max-height: none !important;
+        height: auto !important;
+        overflow-y: visible !important;
+      }
+
       @media (max-width: 700px) {
+        .app-shell {
+          padding-bottom: 0 !important;
+        }
+
         .topbar-main {
-          position: relative;
-          padding-right: 118px !important;
+          grid-template-columns: 1fr !important;
+          grid-template-areas:
+            "tabs"
+            "year";
+          gap: 3px !important;
+          padding: 6px 10px 8px !important;
         }
+
+        .tabs {
+          grid-area: tabs;
+        }
+
+        .tab {
+          min-height: 44px;
+          padding: 6px 2px;
+          border-radius: 9px;
+          font-size: 11px !important;
+          line-height: 1.12;
+        }
+
         .year-control {
-          position: absolute !important;
-          top: 8px;
-          right: 14px;
-          z-index: 120;
-          display: flex !important;
-          align-items: center;
-          gap: 5px;
-          visibility: visible !important;
-          opacity: 1 !important;
-          pointer-events: auto !important;
-          white-space: nowrap;
+          grid-area: year;
+          justify-self: end;
+          font-size: 0 !important;
+          margin: 0;
         }
+
         .year-control select {
-          display: block !important;
-          min-width: 72px;
-          min-height: 40px;
+          min-width: 82px;
+          min-height: 36px;
           font-size: 16px !important;
-          color: #1c1c1e !important;
-          background: #fff !important;
+          padding-top: 6px !important;
+          padding-bottom: 6px !important;
+        }
+
+        main {
+          padding-top: 12px !important;
+          padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important;
         }
       }
     </style>
@@ -44,6 +136,6 @@
   </head>
   <body>
     <div id="app"></div>
-    <script type="module" src="/assets/main.js"></script>
+    <script type="module" src="/assets/main.js?v=20260820-2338"></script>
   </body>
 </html>
