@@ -10,7 +10,7 @@ export const FIXED_CATEGORIES = new Set([
   'spese condominiali',
 ]);
 
-export const TARGET_SAVINGS_RATE = 0.20;
+export const TARGET_SAVINGS_RATE = 0.30;
 
 export const MONTHS = [
   'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
