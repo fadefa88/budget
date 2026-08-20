@@ -11,6 +11,35 @@
     <meta name="robots" content="noindex,nofollow" />
     <title>Budget Dashboard</title>
     <link rel="stylesheet" href="/assets/styles.css" />
+    <style>
+      @media (max-width: 700px) {
+        .topbar-main {
+          position: relative;
+          padding-right: 118px !important;
+        }
+        .year-control {
+          position: absolute !important;
+          top: 8px;
+          right: 14px;
+          z-index: 120;
+          display: flex !important;
+          align-items: center;
+          gap: 5px;
+          visibility: visible !important;
+          opacity: 1 !important;
+          pointer-events: auto !important;
+          white-space: nowrap;
+        }
+        .year-control select {
+          display: block !important;
+          min-width: 72px;
+          min-height: 40px;
+          font-size: 16px !important;
+          color: #1c1c1e !important;
+          background: #fff !important;
+        }
+      }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/echarts@6.0.0/dist/echarts.min.js"></script>
   </head>
   <body>
