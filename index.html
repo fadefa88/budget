@@ -128,8 +128,9 @@
         border-radius: 10px !important;
       }
 
-      /* Solo la tabella dell'Andamento Mensile non ha limite verticale. */
-      .grid-3 + .chart-card + .table-card .table-wrap {
+      /* Le tabelle di Andamento Mensile e Media Mensile non hanno limite verticale. */
+      .grid-3 + .chart-card + .table-card .table-wrap,
+      .grid-3 + .grid-2.section-gap > .table-card .table-wrap {
         max-height: none !important;
         height: auto !important;
         overflow-y: visible !important;
