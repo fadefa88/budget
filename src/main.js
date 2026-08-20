@@ -58,11 +58,12 @@ function renderPage() {
 
 function pageTrend() {
   const { categories, matrix } = monthlyByCategory(data, year);
+  const visibleMatrix = matrix.filter((m) => categories.some((c) => m[c] !== 0));
   const yearly = filterPeriod(data.expenses, year).filter((r) => r.category !== 'investimenti');
   const total = yearly.reduce((s, r) => s + r.amount, 0);
   const cols = categories.map((c) => `<th>${titleCase(c)}</th>`).join('');
-  const rows = matrix.map((m) => `<tr><td>${m.label}</td>${categories.map((c) => `<td>${m[c] ? fmt.euro2.format(m[c]) : '—'}</td>`).join('')}</tr>`).join('');
-  const categoryTotals = categories.map((c) => matrix.reduce((sum, m) => sum + m[c], 0));
+  const rows = visibleMatrix.map((m) => `<tr><td>${m.label}</td>${categories.map((c) => `<td>${m[c] ? fmt.euro2.format(m[c]) : '—'}</td>`).join('')}</tr>`).join('');
+  const categoryTotals = categories.map((c) => visibleMatrix.reduce((sum, m) => sum + m[c], 0));
   const totalsRow = `<tr><td><strong>Totale</strong></td>${categoryTotals.map((v) => `<td><strong>${fmt.euro2.format(v)}</strong></td>`).join('')}</tr>`;
 
   return `<div class="grid grid-3">
@@ -85,8 +86,8 @@ function pageCashflow() {
       ${kpi('Investimenti', fmt.euro.format(annual.investimenti), '', 'blue')}
       ${kpi('Cash Flow Netto', fmt.euro.format(annual.cashFlowNetto), annual.cashFlowNetto >= 0 ? 'Saldo positivo' : 'Saldo negativo', annual.cashFlowNetto >= 0 ? 'good' : 'bad')}
     </div>
-    <div class="card table-card section-gap"><div class="table-wrap"><table><thead><tr><th>Mese</th><th>Entrate</th><th>Uscite</th><th>Investimenti</th><th>Risparmio</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${r.label}</td><td>${fmt.euro2.format(r.entrate)}</td><td>${fmt.euro2.format(r.uscite)}</td><td>${fmt.euro2.format(r.investimenti)}</td><td class="${r.cashFlowNetto >= 0 ? 'good' : 'bad'}"><strong>${fmt.euro2.format(r.cashFlowNetto)}</strong></td></tr>`).join('')}</tbody></table></div></div>
-    <div class="gauge-grid section-gap">${gaugeRows.map((r) => `<div class="card gauge-card"><div id="gauge-${r.month}" class="gauge"></div></div>`).join('')}</div>`;
+    <div class="gauge-grid section-gap">${gaugeRows.map((r) => `<div class="card gauge-card"><div id="gauge-${r.month}" class="gauge"></div></div>`).join('')}</div>
+    <div class="card table-card section-gap"><div class="table-wrap"><table><thead><tr><th>Mese</th><th>Entrate</th><th>Uscite</th><th>Investimenti</th><th>Risparmio</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${r.label}</td><td>${fmt.euro2.format(r.entrate)}</td><td>${fmt.euro2.format(r.uscite)}</td><td>${fmt.euro2.format(r.investimenti)}</td><td class="${r.cashFlowNetto >= 0 ? 'good' : 'bad'}"><strong>${fmt.euro2.format(r.cashFlowNetto)}</strong></td></tr>`).join('')}</tbody></table></div></div>`;
 }
 
 function pageAverage() {
