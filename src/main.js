@@ -56,38 +56,37 @@ function renderPage() {
   return pageTarget();
 }
 
-function pageHead(title, desc, right = '') {
-  return `<div class="page-head"><div><h1 class="page-title">${title}</h1><div class="page-desc">${desc}</div></div>${right}</div>`;
-}
-
 function pageTrend() {
   const { categories, matrix } = monthlyByCategory(data, year);
   const yearly = filterPeriod(data.expenses, year).filter((r) => r.category !== 'investimenti');
   const total = yearly.reduce((s, r) => s + r.amount, 0);
   const cols = categories.map((c) => `<th>${titleCase(c)}</th>`).join('');
-  const rows = matrix.map((m) => `<tr><td>${m.label}</td>${categories.map((c) => `<td>${m[c] ? fmt.euro2.format(m[c]) : '—'}</td>`).join('')}<td>${fmt.euro2.format(categories.reduce((s, c) => s + m[c], 0))}</td></tr>`).join('');
-  return `${pageHead('Andamento Mensile', `Spese per mese e categoria · ${year}`)}
-    <div class="grid grid-3">
+  const rows = matrix.map((m) => `<tr><td>${m.label}</td>${categories.map((c) => `<td>${m[c] ? fmt.euro2.format(m[c]) : '—'}</td>`).join('')}</tr>`).join('');
+  const categoryTotals = categories.map((c) => matrix.reduce((sum, m) => sum + m[c], 0));
+  const totalsRow = `<tr><td><strong>Totale</strong></td>${categoryTotals.map((v) => `<td><strong>${fmt.euro2.format(v)}</strong></td>`).join('')}</tr>`;
+
+  return `<div class="grid grid-3">
       ${kpi('Spese totali', fmt.euro.format(total), 'Investimenti esclusi')}
       ${kpi('Media mensile', fmt.euro.format(total / activeMonths(year)), `${activeMonths(year)} mesi con movimenti`)}
       ${kpi('Categorie', String(categories.length), 'Categorie di spesa operative')}
     </div>
     <div class="card chart-card section-gap"><div class="chart-title">Spese mensili per categoria</div><div id="trendChart" class="chart"></div></div>
-    <div class="card table-card section-gap"><div class="table-wrap"><table><thead><tr><th>Mese</th>${cols}<th>Totale</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+    <div class="card table-card section-gap"><div class="table-wrap"><table><thead><tr><th>Mese</th>${cols}</tr></thead><tbody>${rows}</tbody><tfoot>${totalsRow}</tfoot></table></div></div>`;
 }
 
 function pageCashflow() {
   const rows = monthly(data, year);
+  const gaugeRows = rows.filter(hasMonthData);
   const annual = totals(filterPeriod(data.expenses, year), filterPeriod(data.incomes, year));
-  return `${pageHead('Cash Flow Netto', `Entrate meno uscite e investimenti · ${year}`)}
-    <div class="grid grid-4">
-      ${kpi('Entrate', fmt.euro.format(annual.entrate))}
-      ${kpi('Uscite', fmt.euro.format(annual.uscite))}
-      ${kpi('Investimenti', fmt.euro.format(annual.investimenti))}
+
+  return `<div class="grid grid-4">
+      ${kpi('Entrate', fmt.euro.format(annual.entrate), '', 'good')}
+      ${kpi('Uscite', fmt.euro.format(annual.uscite), '', 'bad')}
+      ${kpi('Investimenti', fmt.euro.format(annual.investimenti), '', 'blue')}
       ${kpi('Cash Flow Netto', fmt.euro.format(annual.cashFlowNetto), annual.cashFlowNetto >= 0 ? 'Saldo positivo' : 'Saldo negativo', annual.cashFlowNetto >= 0 ? 'good' : 'bad')}
     </div>
     <div class="card table-card section-gap"><div class="table-wrap"><table><thead><tr><th>Mese</th><th>Entrate</th><th>Uscite</th><th>Investimenti</th><th>Risparmio</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${r.label}</td><td>${fmt.euro2.format(r.entrate)}</td><td>${fmt.euro2.format(r.uscite)}</td><td>${fmt.euro2.format(r.investimenti)}</td><td class="${r.cashFlowNetto >= 0 ? 'good' : 'bad'}"><strong>${fmt.euro2.format(r.cashFlowNetto)}</strong></td></tr>`).join('')}</tbody></table></div></div>
-    <div class="gauge-grid section-gap">${rows.map((r, i) => `<div class="card gauge-card"><div id="gauge-${i}" class="gauge"></div></div>`).join('')}</div>`;
+    <div class="gauge-grid section-gap">${gaugeRows.map((r) => `<div class="card gauge-card"><div id="gauge-${r.month}" class="gauge"></div></div>`).join('')}</div>`;
 }
 
 function pageAverage() {
@@ -97,13 +96,13 @@ function pageAverage() {
   const fv = fixedVariable(data, year);
   const invRows = filterPeriod(data.expenses, year).filter((r) => r.category === 'investimenti');
   const inv = invRows.reduce((s, r) => s + r.amount, 0);
-  return `${pageHead('Media Mensile', `Medie e composizione delle spese · ${year}`)}
-    <div class="grid grid-3">
-      ${kpi('Media mensile uscite', fmt.euro.format(annual.uscite / months))}
-      ${kpi('Media mensile entrate', fmt.euro.format(annual.entrate / months))}
-      ${kpi('Media mensile investimenti', fmt.euro.format(inv / months))}
-      ${kpi('Spesa fissa media', fmt.euro.format(fv.fixed / months), 'Classificazione provvisoria')}
-      ${kpi('Spesa variabile media', fmt.euro.format(fv.variable / months), 'Classificazione provvisoria')}
+
+  return `<div class="grid grid-3">
+      ${kpi('Media mensile uscite', fmt.euro.format(annual.uscite / months), '', 'bad')}
+      ${kpi('Media mensile entrate', fmt.euro.format(annual.entrate / months), '', 'good')}
+      ${kpi('Media mensile investimenti', fmt.euro.format(inv / months), '', 'blue')}
+      ${kpi('Spesa fissa media', fmt.euro.format(fv.fixed / months))}
+      ${kpi('Spesa variabile media', fmt.euro.format(fv.variable / months))}
       ${kpi('Rigidità finanziaria', fmt.percent.format(fv.rigidity), 'Fisse / spese totali')}
     </div>
     <div class="grid grid-2 section-gap">
@@ -118,13 +117,20 @@ function pageTarget() {
   const inc = filterPeriod(data.incomes, year, filter);
   const t = totals(ex, inc);
   const fv = fixedVariable(data, year, filter);
-  const right = `<div class="month-filter">${MONTHS.map((m, i) => `<button class="month-chip ${selectedMonths.has(i) ? 'active' : ''}" data-month="${i}">${m.slice(0,3)}</button>`).join('')}</div>`;
-  queueMicrotask(() => document.querySelectorAll('[data-month]').forEach((b) => b.addEventListener('click', () => { const m = Number(b.dataset.month); selectedMonths.has(m) ? selectedMonths.delete(m) : selectedMonths.add(m); render(); })));
-  return `${pageHead('Obiettivo di risparmio', selectedMonths.size ? `${selectedMonths.size} mesi selezionati · ${year}` : `Tutto l'anno · ${year}`, right)}
-    <div class="grid grid-4">
-      ${kpi('Entrate', fmt.euro.format(t.entrate))}
-      ${kpi('Uscite', fmt.euro.format(t.uscite))}
-      ${kpi('Investimenti', fmt.euro.format(t.investimenti))}
+  const targetSavingsAmount = t.entrate * TARGET_SAVINGS_RATE;
+  const monthFilter = `<div class="month-filter">${MONTHS.map((m, i) => `<button class="month-chip ${selectedMonths.has(i) ? 'active' : ''}" data-month="${i}">${m.slice(0,3)}</button>`).join('')}</div>`;
+
+  queueMicrotask(() => document.querySelectorAll('[data-month]').forEach((b) => b.addEventListener('click', () => {
+    const m = Number(b.dataset.month);
+    selectedMonths.has(m) ? selectedMonths.delete(m) : selectedMonths.add(m);
+    render();
+  })));
+
+  return `${monthFilter}
+    <div class="grid grid-4 section-gap">
+      ${kpi('Entrate', fmt.euro.format(t.entrate), '', 'good')}
+      ${kpi('Uscite', fmt.euro.format(t.uscite), '', 'bad')}
+      ${kpi('Investimenti', fmt.euro.format(t.investimenti), '', 'blue')}
       ${kpi('Cash Flow Netto', fmt.euro.format(t.cashFlowNetto), '', t.cashFlowNetto >= 0 ? 'good' : 'bad')}
     </div>
     <div class="grid grid-2 section-gap">
@@ -132,7 +138,8 @@ function pageTarget() {
       <div class="card chart-card"><div class="chart-title">Tasso di risparmio</div><div id="savingGauge" class="chart"></div></div>
     </div>
     <div class="grid grid-4 section-gap">
-      ${kpi('Target risparmio', fmt.percent.format(TARGET_SAVINGS_RATE), 'Provvisorio, modificabile')}
+      ${kpi('Target risparmio', fmt.percent.format(TARGET_SAVINGS_RATE))}
+      ${kpi('Quanto avresti dovuto risparmiare', fmt.euro.format(targetSavingsAmount), '30% delle entrate')}
       ${kpi('Capacità di risparmio', fmt.euro.format(t.capacitaRisparmio), fmt.percent.format(t.tassoRisparmio), t.tassoRisparmio >= TARGET_SAVINGS_RATE ? 'good' : 'bad')}
       ${kpi('Spesa fissa', fmt.euro.format(fv.fixed), fmt.percent.format(fv.rigidity))}
       ${kpi('Spesa variabile', fmt.euro.format(fv.variable), fmt.percent.format(1 - fv.rigidity))}
@@ -167,8 +174,8 @@ function renderTrend() {
 }
 
 function renderGauges() {
-  monthly(data, year).forEach((r, i) => {
-    const el = document.querySelector(`#gauge-${i}`); if (!el) return;
+  monthly(data, year).filter(hasMonthData).forEach((r) => {
+    const el = document.querySelector(`#gauge-${r.month}`); if (!el) return;
     const chart = mount(el);
     const pct = r.entrate ? Math.max(-1, Math.min(1, r.cashFlowNetto / r.entrate)) : 0;
     chart.setOption({ series: [{ type: 'gauge', startAngle: 200, endAngle: -20, min: -100, max: 100, splitNumber: 4, radius: '90%', progress: { show: true, width: 12, itemStyle: { color: pct >= 0 ? COLORS.green : COLORS.red } }, axisLine: { lineStyle: { width: 12, color: [[1, '#edebe9']] } }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false }, pointer: { show: false }, anchor: { show: false }, title: { offsetCenter: [0, '48%'], fontSize: 12, color: '#605e5c' }, detail: { valueAnimation: true, formatter: () => fmt.euro.format(r.cashFlowNetto), offsetCenter: [0, '5%'], fontSize: 19, color: pct >= 0 ? COLORS.green : COLORS.red }, data: [{ value: pct * 100, name: r.label }] }] });
@@ -190,6 +197,7 @@ function renderTarget() {
     const chart = mount(chartEl);
     chart.setOption({ color: [COLORS.green, COLORS.red, COLORS.primary], tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, valueFormatter: (v) => fmt.euro2.format(v) }, legend: { bottom: 0 }, grid: { left: 55, right: 22, top: 30, bottom: 55 }, xAxis: { type: 'category', data: visible.map((r) => r.label.slice(0,3)) }, yAxis: { type: 'value', splitLine: { lineStyle: { type: 'dotted' } } }, series: [{ name: 'Entrate', type: 'bar', data: visible.map((r) => r.entrate) }, { name: 'Uscite', type: 'bar', data: visible.map((r) => r.uscite) }, { name: 'Investimenti', type: 'bar', data: visible.map((r) => r.investimenti) }] });
   }
+
   const filter = selectedMonths.size ? selectedMonths : null;
   const t = totals(filterPeriod(data.expenses, year, filter), filterPeriod(data.incomes, year, filter));
   const gaugeEl = document.querySelector('#savingGauge');
@@ -203,6 +211,11 @@ function renderTarget() {
 function activeMonths(y) {
   return new Set([...filterPeriod(data.expenses, y), ...filterPeriod(data.incomes, y)].map((r) => r.date.getMonth())).size || 1;
 }
+
+function hasMonthData(row) {
+  return row.entrate !== 0 || row.uscite !== 0 || row.investimenti !== 0;
+}
+
 function mount(el) { const c = echarts.init(el); chartInstances.push(c); return c; }
 function disposeCharts() { chartInstances.forEach((c) => c.dispose()); chartInstances = []; }
 function resizeCharts() { chartInstances.forEach((c) => c.resize()); }
