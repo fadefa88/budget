@@ -147,7 +147,8 @@ function pageTarget() {
 }
 
 function kpi(label, value, foot = '', cls = '') {
-  return `<div class="card kpi"><div class="kpi-label">${label}</div><div class="kpi-value ${cls}">${value}</div>${foot ? `<div class="kpi-foot">${foot}</div>` : ''}</div>`;
+  const inlineStyle = cls === 'blue' ? ' style="color: var(--blue)"' : '';
+  return `<div class="card kpi"><div class="kpi-label">${label}</div><div class="kpi-value ${cls}"${inlineStyle}>${value}</div>${foot ? `<div class="kpi-foot">${foot}</div>` : ''}</div>`;
 }
 
 function renderCharts() {
