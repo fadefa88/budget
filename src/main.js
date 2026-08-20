@@ -165,6 +165,7 @@ function renderCharts() {
 
 function renderTrend() {
   const { categories, matrix } = monthlyByCategory(data, year);
+  const visibleMatrix = matrix.filter((m) => categories.some((c) => m[c] !== 0));
   const el = document.querySelector('#trendChart'); if (!el) return;
   const chart = mount(el);
   chart.setOption({
@@ -172,9 +173,9 @@ function renderTrend() {
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, valueFormatter: (v) => fmt.euro2.format(v) },
     legend: { type: 'scroll', bottom: 0 },
     grid: { left: 52, right: 22, top: 20, bottom: 82 },
-    xAxis: { type: 'category', data: MONTHS.map((m) => m.slice(0,3)) },
+    xAxis: { type: 'category', data: visibleMatrix.map((r) => r.label.slice(0,3)) },
     yAxis: { type: 'value', axisLabel: { formatter: (v) => `${Math.round(v / 1000)}k` }, splitLine: { lineStyle: { type: 'dotted' } } },
-    series: categories.map((c) => ({ name: titleCase(c), type: 'bar', stack: 'spese', emphasis: { focus: 'series' }, data: matrix.map((r) => Math.round(r[c] * 100) / 100) })),
+    series: categories.map((c) => ({ name: titleCase(c), type: 'bar', stack: 'spese', emphasis: { focus: 'series' }, data: visibleMatrix.map((r) => Math.round(r[c] * 100) / 100) })),
   });
 }
 
