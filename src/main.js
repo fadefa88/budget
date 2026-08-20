@@ -113,13 +113,16 @@ function pageAverage() {
 }
 
 function pageTarget() {
+  const availableRows = monthly(data, year).filter(hasMonthData);
+  const availableMonths = new Set(availableRows.map((r) => r.month));
+  selectedMonths = new Set([...selectedMonths].filter((m) => availableMonths.has(m)));
   const filter = selectedMonths.size ? selectedMonths : null;
   const ex = filterPeriod(data.expenses, year, filter);
   const inc = filterPeriod(data.incomes, year, filter);
   const t = totals(ex, inc);
   const fv = fixedVariable(data, year, filter);
   const targetSavingsAmount = t.entrate * TARGET_SAVINGS_RATE;
-  const monthFilter = `<div class="month-filter">${MONTHS.map((m, i) => `<button class="month-chip ${selectedMonths.has(i) ? 'active' : ''}" data-month="${i}">${m.slice(0,3)}</button>`).join('')}</div>`;
+  const monthFilter = `<div class="month-filter">${availableRows.map((r) => `<button class="month-chip ${selectedMonths.has(r.month) ? 'active' : ''}" data-month="${r.month}">${r.label.slice(0,3)}</button>`).join('')}</div>`;
 
   queueMicrotask(() => document.querySelectorAll('[data-month]').forEach((b) => b.addEventListener('click', () => {
     const m = Number(b.dataset.month);
@@ -192,7 +195,7 @@ function renderCategory() {
 }
 
 function renderTarget() {
-  const rows = monthly(data, year);
+  const rows = monthly(data, year).filter(hasMonthData);
   const visible = selectedMonths.size ? rows.filter((r) => selectedMonths.has(r.month)) : rows;
   const chartEl = document.querySelector('#targetChart');
   if (chartEl) {
