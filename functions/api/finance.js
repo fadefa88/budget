@@ -9,10 +9,15 @@ export async function onRequestGet(context) {
       return json({ error: 'Configurazione Google Sheets incompleta in Cloudflare Pages.' }, 503);
     }
 
+    const requestUrl = new URL(context.request.url);
+    const forceRefresh = requestUrl.searchParams.get('refresh') === '1';
     const cache = caches.default;
-    const cacheKey = new Request(`${new URL(context.request.url).origin}/api/finance-cache-v1`);
-    const cached = await cache.match(cacheKey);
-    if (cached) return cached;
+    const cacheKey = new Request(`${requestUrl.origin}/api/finance-cache-v1`);
+
+    if (!forceRefresh) {
+      const cached = await cache.match(cacheKey);
+      if (cached) return cached;
+    }
 
     const accessToken = await getAccessToken(GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY);
     const [conto, entrate] = await Promise.all([
@@ -23,8 +28,12 @@ export async function onRequestGet(context) {
     const expenses = parseExpenses(conto);
     const incomes = parseIncomes(entrate);
     const response = json({ generatedAt: new Date().toISOString(), expenses, incomes });
-    response.headers.set('Cache-Control', 'public, max-age=300');
-    context.waitUntil(cache.put(cacheKey, response.clone()));
+    response.headers.set('Cache-Control', forceRefresh ? 'no-store' : 'public, max-age=300');
+
+    const cachedResponse = json({ generatedAt: new Date().toISOString(), expenses, incomes });
+    cachedResponse.headers.set('Cache-Control', 'public, max-age=300');
+    context.waitUntil(cache.put(cacheKey, cachedResponse));
+
     return response;
   } catch (error) {
     console.error(error);
@@ -83,7 +92,7 @@ async function getAccessToken(email, privateKey) {
   const key = await importPrivateKey(privateKey);
   const signature = await crypto.subtle.sign({ name: 'RSASSA-PKCS1-v1_5' }, key, new TextEncoder().encode(unsigned));
   const assertion = `${unsigned}.${base64UrlBytes(new Uint8Array(signature))}`;
-  const body = new URLSearchParams({ grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion });
+  const body = new URLSearchParams({ grant_type: 'urn:ietf:params:oauth2:grant-type:jwt-bearer', assertion });
   const res = await fetch(TOKEN_URL, { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body });
   if (!res.ok) throw new Error(`Google OAuth ${res.status}: ${await res.text()}`);
   const payload = await res.json();
