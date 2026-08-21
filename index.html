@@ -10,7 +10,7 @@
     <meta name="format-detection" content="telephone=no" />
     <meta name="robots" content="noindex,nofollow" />
     <title>Budget Dashboard</title>
-    <link rel="stylesheet" href="/assets/styles.css?v=20260821-0016" />
+    <link rel="stylesheet" href="/assets/styles.css?v=20260821-0939" />
     <style>
       /* Header essenziale: solo tab + controlli. */
       .brand,
@@ -136,6 +136,15 @@
         overflow-y: visible !important;
       }
 
+      /* Prima colonna Andamento Mensile: sfondo opaco durante lo scroll orizzontale. */
+      .grid-3 + .chart-card + .table-card tbody td:first-child,
+      .grid-3 + .chart-card + .table-card tfoot td:first-child {
+        background: #fff !important;
+        background-clip: padding-box;
+        opacity: 1 !important;
+        z-index: 2;
+      }
+
       @media (max-width: 700px) {
         .app-shell {
           padding-bottom: 0 !important;
@@ -198,6 +207,6 @@
   </head>
   <body>
     <div id="app"></div>
-    <script type="module" src="/assets/main.js?v=20260821-0016"></script>
+    <script type="module" src="/assets/main.js?v=20260821-0939"></script>
   </body>
 </html>
