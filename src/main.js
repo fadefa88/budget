@@ -233,7 +233,7 @@ function renderGauges() {
         pointer: { show: true, length: '62%', width: 4, itemStyle: { color: gaugeColor } },
         anchor: { show: true, size: 7, itemStyle: { color: gaugeColor } },
         title: { offsetCenter: [0, '50%'], fontSize: 12, color: '#605e5c' },
-        detail: { valueAnimation: true, formatter: () => fmt.euro.format(r.cashFlowNetto), offsetCenter: [0, '12%'], fontSize: 19, color: gaugeColor },
+        detail: { valueAnimation: true, formatter: () => fmt.euro.format(r.cashFlowNetto), offsetCenter: [0, '22%'], fontSize: 19, color: gaugeColor },
         data: [{ value: gaugeValue, name: r.label }],
       }],
     });
