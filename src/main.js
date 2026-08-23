@@ -210,7 +210,8 @@ function renderGauges() {
     const el = document.querySelector(`#gauge-${r.month}`); if (!el) return;
     const chart = mount(el);
     const pct = r.entrate ? Math.max(-1, Math.min(1, r.cashFlowNetto / r.entrate)) : 0;
-    chart.setOption({ series: [{ type: 'gauge', startAngle: 200, endAngle: -20, min: -100, max: 100, splitNumber: 4, radius: '90%', progress: { show: true, width: 12, itemStyle: { color: pct >= 0 ? COLORS.green : COLORS.red } }, axisLine: { lineStyle: { width: 12, color: [[1, '#edebe9']] } }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false }, pointer: { show: false }, anchor: { show: false }, title: { offsetCenter: [0, '48%'], fontSize: 12, color: '#605e5c' }, detail: { valueAnimation: true, formatter: () => fmt.euro.format(r.cashFlowNetto), offsetCenter: [0, '5%'], fontSize: 19, color: pct >= 0 ? COLORS.green : COLORS.red }, data: [{ value: pct * 100, name: r.label }] }] });
+    const magnitude = Math.abs(pct) * 100;
+    chart.setOption({ series: [{ type: 'gauge', startAngle: 200, endAngle: -20, min: 0, max: 100, splitNumber: 4, radius: '90%', progress: { show: true, width: 12, itemStyle: { color: pct >= 0 ? COLORS.green : COLORS.red } }, axisLine: { lineStyle: { width: 12, color: [[1, '#edebe9']] } }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false }, pointer: { show: false }, anchor: { show: false }, title: { offsetCenter: [0, '48%'], fontSize: 12, color: '#605e5c' }, detail: { valueAnimation: true, formatter: () => fmt.euro.format(r.cashFlowNetto), offsetCenter: [0, '5%'], fontSize: 19, color: pct >= 0 ? COLORS.green : COLORS.red }, data: [{ value: magnitude, name: r.label }] }] });
   });
 }
 
