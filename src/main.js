@@ -209,9 +209,34 @@ function renderGauges() {
   monthly(data, year).filter(hasMonthData).forEach((r) => {
     const el = document.querySelector(`#gauge-${r.month}`); if (!el) return;
     const chart = mount(el);
-    const pct = r.entrate ? Math.max(-1, Math.min(1, r.cashFlowNetto / r.entrate)) : 0;
-    const magnitude = Math.abs(pct) * 100;
-    chart.setOption({ series: [{ type: 'gauge', startAngle: 200, endAngle: -20, min: 0, max: 100, splitNumber: 4, radius: '90%', progress: { show: true, width: 12, itemStyle: { color: pct >= 0 ? COLORS.green : COLORS.red } }, axisLine: { lineStyle: { width: 12, color: [[1, '#edebe9']] } }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false }, pointer: { show: false }, anchor: { show: false }, title: { offsetCenter: [0, '48%'], fontSize: 12, color: '#605e5c' }, detail: { valueAnimation: true, formatter: () => fmt.euro.format(r.cashFlowNetto), offsetCenter: [0, '5%'], fontSize: 19, color: pct >= 0 ? COLORS.green : COLORS.red }, data: [{ value: magnitude, name: r.label }] }] });
+    const gaugeValue = Math.max(-5000, Math.min(5000, r.cashFlowNetto));
+    const gaugeColor = r.cashFlowNetto >= 0 ? COLORS.green : COLORS.red;
+    chart.setOption({
+      series: [{
+        type: 'gauge',
+        startAngle: 200,
+        endAngle: -20,
+        min: -5000,
+        max: 5000,
+        splitNumber: 2,
+        radius: '90%',
+        progress: { show: false },
+        axisLine: { lineStyle: { width: 12, color: [[0.5, COLORS.red], [1, COLORS.green]] } },
+        axisTick: { show: false },
+        splitLine: { distance: -16, length: 12, lineStyle: { width: 2, color: '#fff' } },
+        axisLabel: {
+          distance: 18,
+          color: '#8e8e93',
+          fontSize: 10,
+          formatter: (value) => value === -5000 ? '-5k' : value === 0 ? '0' : value === 5000 ? '+5k' : '',
+        },
+        pointer: { show: true, length: '62%', width: 4, itemStyle: { color: gaugeColor } },
+        anchor: { show: true, size: 7, itemStyle: { color: gaugeColor } },
+        title: { offsetCenter: [0, '50%'], fontSize: 12, color: '#605e5c' },
+        detail: { valueAnimation: true, formatter: () => fmt.euro.format(r.cashFlowNetto), offsetCenter: [0, '12%'], fontSize: 19, color: gaugeColor },
+        data: [{ value: gaugeValue, name: r.label }],
+      }],
+    });
   });
 }
 
